@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <!-- LEAFLET -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+   integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
+   crossorigin=""/>
+   <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+   integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+   crossorigin=""></script>
+    <!-- END LEAFLET -->
+
+    <title>CSUEB Bus Live Map</title>
+  </head>
+  <body>
+    <h1>CSUEB Bus Live Map</h1>
+    <div id="map" style = "width:900px; height:580px;"></div>
+    <script>
+        var mymap = L.map('map').setView([50, 240], 13);
+        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            maxZoom: 18,
+            id: 'mapbox/streets-v11',
+            tileSize: 512,
+            zoomOffset: -1,
+            accessToken: 'pk.eyJ1IjoiaGFueXVhbmgiLCJhIjoiY2s4b3ozemV5MWF4YTNsbDM5aXNuM2pwZyJ9.iERbO4VhUaJ0kmq752zmaw'
+        }).addTo(mymap);
+
+        mapMarkers1 = [];
+        mapMarkers2 = [];
+        mapMarkers3 = [];
+
+        var source = new EventSource('/topic/geodata_final123');
+        source.addEventListener('message', function(e){
+            console.log('Message');
+            obj = JSON.parse(e.data);
+            console.log(obj);
+
+            if (obj.busline == '00001'){
+                console.log('Found busline 01')
+                for (var i = 0; i < mapMarkers1.length; i++){
+                    mymap.removeLayer(mapMarkers1[i]);
+                }
+                marker1 = L.marker([obj.latitude, obj.longitude],{
+                    markerColor: 'red'
+                }).addTo(mymap);
+                mapMarkers1.push(marker1);
+            }
+            if (obj.busline == '00002'){
+                for (var i = 0; i < mapMarkers2.length; i++){
+                    mymap.removeLayer(mapMarkers2[i]);
+                }
+                marker2 = L.marker([obj.latitude, obj.longitude], {
+                    markerColor: 'green'
+                }).addTo(mymap);
+                mapMarkers2.push(marker2);
+            }
+            if (obj.busline == '00003'){
+                for (var i = 0; i < mapMarkers3.length; i++){
+                    mymap.removeLayer(mapMarkers3[i]);
+                }
+                marker3 = L.marker([obj.latitude, obj.longitude]).addTo(mymap);
+                mapMarkers3.push(marker3);
+            }
+        }, false);
+    </script>
+</body>
+</html>
